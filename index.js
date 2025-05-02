@@ -12,7 +12,7 @@ dotenv.config();
 const app = Fastify();
 
 app.register(fastifyCors, {
-  origin: process.env.FRONTEND_URL,
+  origin: true,
   credentials: true,
 });
 
