@@ -65,6 +65,16 @@ export const discordCallback = async (request, reply) => {
     avatar: user.avatar,
   };
 
+  await new Promise((resolve, reject) => {
+    request.session.save((err) => {
+      if (err) {
+        console.error("Ошибка сохранения сессии:", err);
+        return reject(err);
+      }
+      resolve();
+    });
+  });
+
   return reply.redirect(`${process.env.FRONTEND_URL}/?authSuccess=true`);
 };
 
