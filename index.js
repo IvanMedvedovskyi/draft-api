@@ -25,7 +25,7 @@ app.register(fastifySession, {
   secret: process.env.SESSION_SECRET,
   cookie: {
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   },
   saveUninitialized: false,
