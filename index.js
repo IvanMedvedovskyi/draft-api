@@ -16,14 +16,19 @@ app.register(fastifyCors, {
   credentials: true,
 });
 
-app.register(fastifyCookie);
+app.register(fastifyCookie, {
+  secret: process.env.COOKIE_SECRET,
+  hook: "onRequest",
+});
 
 app.register(fastifySession, {
   secret: process.env.SESSION_SECRET,
   cookie: {
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   },
+  saveUninitialized: false,
 });
 
 // Регистрируем роуты
