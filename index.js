@@ -12,10 +12,9 @@ dotenv.config();
 const app = Fastify();
 
 app.register(fastifyCors, {
-  origin: true,
+  origin: process.env.FRONTEND_URL,
   credentials: true,
 });
-
 
 app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET,
