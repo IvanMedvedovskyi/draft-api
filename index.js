@@ -16,14 +16,6 @@ app.register(fastifyCors, {
   credentials: true,
 });
 
-app.options("*", (request, reply) => {
-  reply
-    .header("Access-Control-Allow-Origin", request.headers.origin || "*")
-    .header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-    .header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-    .header("Access-Control-Allow-Credentials", "true")
-    .send();
-});
 
 app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET,
