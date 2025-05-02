@@ -1,15 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getProfile = async (request, reply) => {
-  if (!request.session.user) {
-    return reply.redirect("/auth/discord");
+export const getProfile = async (req, reply) => {
+  if (!req.session.user) {
+    return reply.code(401).send({ error: "UNAUTHENTICATED" });
   }
-
-  return {
-    message: "Вы авторизованы!",
-    user: request.session.user,
-  };
+  return { user: req.session.user };
 };
 
 export const getAllProfiles = async (request, reply) => {
