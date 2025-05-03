@@ -12,11 +12,11 @@ dotenv.config();
 const app = Fastify();
 
 app.register(fastifyCors, {
-  origin: [
-    "http://localhost:3000",
-    "https://redundant-eartha-draft-453fdc88.koyeb.app",
-  ],
   credentials: true,
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error("Origin not allowed by CORS"));
+  },
 });
 
 app.register(fastifyCookie, {
@@ -27,7 +27,7 @@ app.register(fastifyCookie, {
 app.register(fastifySession, {
   secret: process.env.SESSION_SECRET,
   cookie: {
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "none",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   },
