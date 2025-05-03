@@ -12,7 +12,10 @@ dotenv.config();
 const app = Fastify();
 
 app.register(fastifyCors, {
-  origin: ["http://localhost:3000"],
+  origin: [
+    "http://localhost:3000",
+    "https://redundant-eartha-draft-453fdc88.koyeb.app",
+  ],
   credentials: true,
 });
 
