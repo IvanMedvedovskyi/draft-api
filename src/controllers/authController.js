@@ -65,6 +65,8 @@ export const discordCallback = async (request, reply) => {
     avatar: user.avatar,
   };
 
+  await request.session.save();
+
   return reply.redirect(`${process.env.FRONTEND_URL}/?authSuccess=true`);
 };
 
