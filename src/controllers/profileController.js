@@ -32,6 +32,12 @@ export const updateProfile = async (request, reply) => {
       data: { customName },
     });
 
+    if (request.session.user) {
+      request.session.user.customName = updatedUser.customName;
+    }
+
+    await request.session.save();
+
     return reply.status(200).send(updatedUser);
   } catch (error) {
     console.error(error);
