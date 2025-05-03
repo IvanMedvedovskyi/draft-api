@@ -60,8 +60,8 @@ export const discordCallback = async (request, reply) => {
   request.session.user = {
     id: user.id,
     discordId: user.discordId,
-    globalName: userData.global_name,
-    customName: userData.global_name,
+    globalName: user.globalName || userData.global_name || "",
+    customName: user.customName || userData.global_name || "",
     username: user.username,
     email: user.email,
     avatar: user.avatar,
