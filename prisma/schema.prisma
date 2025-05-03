@@ -18,6 +18,7 @@ model User {
   discordId  String   @unique
   username   String
   globalName String?
+  customName String?
   avatar     String?
   email      String?
   createdAt  DateTime @default(now())
