@@ -14,14 +14,14 @@ datasource db {
 }
 
 model User {
-  id         String      @id @default(cuid())
-  discordId  String      @unique
+  id         String   @id @default(cuid())
+  discordId  String   @unique
   username   String
   globalName String?
   customName String?
   avatar     String?
   email      String?
-  createdAt  DateTime    @default(now())
+  createdAt  DateTime @default(now())
 }
 
 model Character {
@@ -39,4 +39,15 @@ model Character {
   halfPortrait170 String
   iconHoyo        String
   createdAt       DateTime @default(now())
+}
+
+model Weapon {
+  id          String  @id
+  icon        String
+  rank        Int
+  type        Int
+  en          String
+  ru          String?
+  iconUrl     String
+  hoyoIconSrc String?
 }

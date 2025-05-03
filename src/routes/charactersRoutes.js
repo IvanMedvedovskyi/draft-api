@@ -1,4 +1,4 @@
-import { getAllCharacters } from "../controllers/charactersController.js";
+import { getAllCharacters, getAllWeapons } from "../controllers/charactersController.js";
 
 async function charactersRoutes(app, options) {
   app.get("/characters", {
@@ -40,6 +40,41 @@ async function charactersRoutes(app, options) {
       },
     },
     handler: getAllCharacters,
+  });
+
+  app.get("/weapons", {
+    schema: {
+      description: "Get all weapons",
+      tags: ["Weapons"],
+      summary: "Returns a list of all weapons",
+      response: {
+        200: {
+          description: "List of weapons",
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              icon: { type: "string" },
+              rank: { type: "integer" },
+              type: { type: "integer" },
+              en: { type: "string" },
+              ru: { type: "string" },
+              iconUrl: { type: "string" },
+              hoyoIconSrc: { type: "string" },
+            },
+          },
+        },
+        500: {
+          description: "Server Error",
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: getAllWeapons,
   });
 }
 
