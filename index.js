@@ -14,11 +14,13 @@ dotenv.config();
 
 const app = Fastify();
 
+// --- Настройка CORS ---
 app.register(fastifyCors, {
   origin: process.env.FRONTEND_URL,
   credentials: true,
 });
 
+// --- Cookie и Сессии ---
 app.register(fastifyCookie);
 
 app.register(fastifySession, {
@@ -26,23 +28,25 @@ app.register(fastifySession, {
   cookie: {
     secure: true,
     sameSite: "none",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
   },
   saveUninitialized: false,
 });
 
+// --- Swagger ---
 await app.register(fastifySwagger, {
-  swagger: {
+  mode: "dynamic", // <<<<<< ПРАВИЛЬНО ВАЖНО
+  openapi: {
     info: {
       title: "Draft",
       description: "Draft API Routes",
       version: "1.0.0",
     },
-    host:
-      process.env.FRONTEND_URL?.replace(/^https?:\/\//, "") || "localhost:3000",
-    schemes: ["https"],
-    consumes: ["application/json"],
-    produces: ["application/json"],
+    servers: [
+      {
+        url: process.env.BACKEND_URL || "http://localhost:3000",
+      },
+    ],
     tags: [
       {
         name: "Auth",
@@ -56,22 +60,18 @@ await app.register(fastifySwagger, {
   },
 });
 
-// Swagger UI (/docs)
 await app.register(fastifySwaggerUi, {
   routePrefix: "/docs",
-  uiConfig: {
-    docExpansion: "full",
-    deepLinking: false,
-  },
   staticCSP: true,
   transformStaticCSP: (header) => header,
+  exposeRoute: true, // <<<<<< Обязательно exposeRoute
 });
 
-// Регистрируем роуты
+// --- Роуты ---
 app.register(authRoutes);
 app.register(profileRoutes);
 
-// Запуск сервера
+// --- Запуск сервера ---
 const start = async () => {
   try {
     await app.listen({
