@@ -51,7 +51,7 @@ async function profileRoutes(app, options) {
         description: "Позволяет обновить данные пользователя, например имя.",
         body: {
           type: "object",
-          required: ["userId", "globalName"],
+          required: ["userId", "customName"],
           properties: {
             userId: { type: "string", description: "ID пользователя" },
             globalName: { type: "string", description: "Новое глобальное имя" },

@@ -18,9 +18,9 @@ export const getAllProfiles = async (request, reply) => {
 };
 
 export const updateProfile = async (request, reply) => {
-  const { userId, globalName } = request.body;
+  const { userId, customName } = request.body;
 
-  if (!userId || !globalName) {
+  if (!userId || !customName) {
     return reply
       .status(400)
       .send({ error: "userId and username are required" });
@@ -29,7 +29,7 @@ export const updateProfile = async (request, reply) => {
   try {
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { globalName },
+      data: { customName },
     });
 
     return reply.status(200).send(updatedUser);
