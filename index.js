@@ -12,26 +12,18 @@ dotenv.config();
 const app = Fastify();
 
 app.register(fastifyCors, {
+  origin: process.env.FRONTEND_URL,
   credentials: true,
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error("Origin not allowed by CORS"));
-  },
 });
 
-app.register(fastifyCookie, {
-  secret: process.env.COOKIE_SECRET,
-  hook: "onRequest",
-});
+app.register(fastifyCookie);
 
 app.register(fastifySession, {
   secret: process.env.SESSION_SECRET,
   cookie: {
-    secure: true,
-    sameSite: "none",
+    secure: false,
     maxAge: 30 * 24 * 60 * 60 * 1000,
   },
-  saveUninitialized: false,
 });
 
 // Регистрируем роуты
