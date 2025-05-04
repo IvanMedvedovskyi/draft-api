@@ -41,6 +41,7 @@ model Character {
   iconHoyo        String
   createdAt       DateTime        @default(now())
   users           UserCharacter[]
+  mindscape       Int             @default(0)
 }
 
 model Weapon {
