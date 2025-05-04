@@ -13,7 +13,9 @@ export const getProfile = async (request, reply) => {
 };
 
 export const getAllProfiles = async (request, reply) => {
-  const profiles = await prisma.user.findMany();
+  const profiles = await prisma.user.findMany({
+    include: { characters: true },
+  });
   return reply.status(200).send(profiles);
 };
 
@@ -44,4 +46,3 @@ export const updateProfile = async (request, reply) => {
     return reply.status(500).send({ error: "Failed to update profile" });
   }
 };
-
