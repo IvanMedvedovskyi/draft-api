@@ -22,3 +22,40 @@ export const getAllWeapons = async (request, reply) => {
     return reply.code(500).send({ error: "Internal Server Error" });
   }
 };
+
+export const updateUserCharacters = async (request, reply) => {
+  const { userId, characterIds } = request.body;
+
+  if (!userId || !Array.isArray(characterIds) || characterIds.length === 0) {
+    return reply
+      .status(400)
+      .send({ error: "userId and characterIds are required" });
+  }
+
+  try {
+    await prisma.userCharacter.createMany({
+      data: characterIds.map((characterId) => ({
+        userId,
+        characterId,
+      })),
+      skipDuplicates: true,
+    });
+
+    if (request.session.user) {
+      const characters = await prisma.userCharacter.findMany({
+        where: { userId },
+        include: { character: true },
+      });
+
+      request.session.user.characters = characters.map((uc) => uc.character);
+      await request.session.save();
+    }
+
+    return reply
+      .status(200)
+      .send({ message: "Characters updated successfully" });
+  } catch (error) {
+    console.error(error);
+    return reply.status(500).send({ error: "Failed to update characters" });
+  }
+};

@@ -14,18 +14,19 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  discordId  String   @unique
+  id         String          @id @default(cuid())
+  discordId  String          @unique
   username   String
   globalName String?
   customName String?
   avatar     String?
   email      String?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime        @default(now())
+  characters UserCharacter[]
 }
 
 model Character {
-  id              String   @id
+  id              String          @id
   code            String
   rank            Int
   type            Int
@@ -38,7 +39,8 @@ model Character {
   halfPortrait    String
   halfPortrait170 String
   iconHoyo        String
-  createdAt       DateTime @default(now())
+  createdAt       DateTime        @default(now())
+  users           UserCharacter[]
 }
 
 model Weapon {
@@ -50,4 +52,17 @@ model Weapon {
   ru          String?
   iconUrl     String
   hoyoIconSrc String?
+}
+
+model UserCharacter {
+  id          String @id @default(cuid())
+  userId      String
+  characterId String
+
+  user      User      @relation(fields: [userId], references: [id])
+  character Character @relation(fields: [characterId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, characterId])
 }

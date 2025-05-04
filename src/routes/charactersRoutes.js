@@ -1,4 +1,8 @@
-import { getAllCharacters, getAllWeapons } from "../controllers/charactersController.js";
+import {
+  getAllCharacters,
+  getAllWeapons,
+  updateUserCharacters,
+} from "../controllers/charactersController.js";
 
 async function charactersRoutes(app, options) {
   app.get("/characters", {
@@ -75,6 +79,49 @@ async function charactersRoutes(app, options) {
       },
     },
     handler: getAllWeapons,
+  });
+
+  app.post("/user/characters", {
+    schema: {
+      description: "Update user characters",
+      tags: ["Characters"],
+      summary: "User selects characters",
+      body: {
+        type: "object",
+        required: ["userId", "characterIds"],
+        properties: {
+          userId: { type: "string" },
+          characterIds: {
+            type: "array",
+            items: { type: "string" },
+          },
+        },
+      },
+      response: {
+        200: {
+          description: "Characters updated successfully",
+          type: "object",
+          properties: {
+            message: { type: "string" },
+          },
+        },
+        400: {
+          description: "Bad Request",
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+        500: {
+          description: "Internal Server Error",
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: updateUserCharacters,
   });
 }
 

@@ -44,3 +44,4 @@ export const updateProfile = async (request, reply) => {
     return reply.status(500).send({ error: "Failed to update profile" });
   }
 };
+
