@@ -80,8 +80,8 @@ export const addCharacterToUser = async (req, reply) => {
       data: {
         userId,
         characterId,
-        rank: character.rank,
-        mindscape: 0, 
+        rank: rank ?? character.rank,
+        mindscape: mindscape ?? 0,
       },
     });
 
