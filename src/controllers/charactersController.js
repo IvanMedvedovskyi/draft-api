@@ -91,3 +91,23 @@ export const addCharacterToUser = async (req, reply) => {
     return reply.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+export const getUserCharacters = async (request, reply) => {
+  const { userId } = request.body;
+
+  if (!userId) {
+    return reply.status(400).send({ error: "Missing userId" });
+  }
+
+  try {
+    const userCharacters = await prisma.userCharacter.findMany({
+      where: { userId },
+      include: { character: true },
+    });
+
+    return reply.status(200).send(userCharacters);
+  } catch (error) {
+    console.error("Failed to fetch user characters:", error);
+    return reply.status(500).send({ error: "Internal Server Error" });
+  }
+};
