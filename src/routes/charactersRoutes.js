@@ -20,6 +20,7 @@ async function charactersRoutes(app, options) {
               id: { type: "string" },
               code: { type: "string" },
               rank: { type: "integer" },
+              mindscape: { type: "integer" },
               type: { type: "integer" },
               element: { type: "integer" },
               camp: { type: "integer" },
