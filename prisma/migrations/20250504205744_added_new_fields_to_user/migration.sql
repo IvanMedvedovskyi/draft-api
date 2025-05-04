@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "UserCharacter" ADD COLUMN     "mindscape" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "rank" INTEGER NOT NULL DEFAULT 0;

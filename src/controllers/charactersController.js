@@ -59,3 +59,35 @@ export const updateUserCharacters = async (request, reply) => {
     return reply.status(500).send({ error: "Failed to update characters" });
   }
 };
+
+export const addCharacterToUser = async (req, reply) => {
+  const { userId, characterId } = req.body;
+
+  if (!userId || !characterId) {
+    return reply.status(400).send({ error: "Missing userId or characterId" });
+  }
+
+  try {
+    const character = await prisma.character.findUnique({
+      where: { id: characterId },
+    });
+
+    if (!character) {
+      return reply.status(404).send({ error: "Character not found" });
+    }
+
+    const userCharacter = await prisma.userCharacter.create({
+      data: {
+        userId,
+        characterId,
+        rank: character.rank,
+        mindscape: 0, 
+      },
+    });
+
+    return reply.status(201).send(userCharacter);
+  } catch (error) {
+    console.error("Failed to add character to user:", error);
+    return reply.status(500).send({ error: "Internal Server Error" });
+  }
+};

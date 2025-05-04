@@ -63,6 +63,9 @@ model UserCharacter {
   user      User      @relation(fields: [userId], references: [id])
   character Character @relation(fields: [characterId], references: [id])
 
+  rank      Int @default(0)
+  mindscape Int @default(0)
+
   createdAt DateTime @default(now())
 
   @@unique([userId, characterId])

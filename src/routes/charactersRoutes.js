@@ -2,6 +2,7 @@ import {
   getAllCharacters,
   getAllWeapons,
   updateUserCharacters,
+  addCharacterToUser,
 } from "../controllers/charactersController.js";
 
 async function charactersRoutes(app, options) {
@@ -123,6 +124,58 @@ async function charactersRoutes(app, options) {
       },
     },
     handler: updateUserCharacters,
+  });
+
+  app.post("/user/character/add", {
+    schema: {
+      description: "Add a character to a user",
+      tags: ["Characters"],
+      summary: "Adds a character to a user with inherited rank",
+      body: {
+        type: "object",
+        required: ["userId", "characterId"],
+        properties: {
+          userId: { type: "string" },
+          characterId: { type: "string" },
+        },
+      },
+      response: {
+        201: {
+          description: "Character added successfully",
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            userId: { type: "string" },
+            characterId: { type: "string" },
+            rank: { type: "integer" },
+            mindscape: { type: "integer" },
+            createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        400: {
+          description: "Bad Request",
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+        404: {
+          description: "Character not found",
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+        500: {
+          description: "Internal Server Error",
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: addCharacterToUser,
   });
 }
 
