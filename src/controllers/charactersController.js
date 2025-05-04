@@ -61,7 +61,7 @@ export const updateUserCharacters = async (request, reply) => {
 };
 
 export const addCharacterToUser = async (req, reply) => {
-  const { userId, characterId } = req.body;
+  const { userId, characterId, rank, mindscape } = req.body;
 
   if (!userId || !characterId) {
     return reply.status(400).send({ error: "Missing userId or characterId" });
