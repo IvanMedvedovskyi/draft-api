@@ -6,10 +6,30 @@ export const getProfile = async (request, reply) => {
     return reply.redirect("/auth/discord");
   }
 
-  return {
-    message: "Вы авторизованы!",
-    user: request.session.user,
-  };
+  try {
+    const userId = request.session.user.id;
+
+    const userCharacters = await prisma.userCharacter.findMany({
+      where: { userId },
+      include: { character: true },
+    });
+
+    return reply.send({
+      message: "Вы авторизованы!",
+      user: {
+        ...request.session.user,
+        characters: userCharacters.map((uc) => ({
+          ...uc.character,
+          mindscape: uc.mindscape,
+          rank: uc.rank,
+          createdAt: uc.createdAt,
+        })),
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch user characters:", error);
+    return reply.status(500).send({ error: "Internal Server Error" });
+  }
 };
 
 export const getAllProfiles = async (request, reply) => {

@@ -15,6 +15,8 @@ dotenv.config();
 
 const app = Fastify();
 
+app.setSerializerCompiler(() => JSON.stringify);
+
 // --- Настройка CORS ---
 app.register(fastifyCors, {
   origin: process.env.FRONTEND_URL,

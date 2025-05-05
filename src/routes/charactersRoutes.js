@@ -2,8 +2,6 @@ import {
   getAllCharacters,
   getAllWeapons,
   updateUserCharacters,
-  addCharacterToUser,
-  getUserCharacters,
 } from "../controllers/charactersController.js";
 
 async function charactersRoutes(app, options) {
@@ -22,7 +20,6 @@ async function charactersRoutes(app, options) {
               id: { type: "string" },
               code: { type: "string" },
               rank: { type: "integer" },
-              mindscape: { type: "integer" },
               type: { type: "integer" },
               element: { type: "integer" },
               camp: { type: "integer" },
@@ -33,16 +30,14 @@ async function charactersRoutes(app, options) {
               halfPortrait: { type: "string" },
               halfPortrait170: { type: "string" },
               iconHoyo: { type: "string" },
-              _id: { type: "string" },
+              createdAt: { type: "string", format: "date-time" },
             },
           },
         },
         500: {
           description: "Internal Server Error",
           type: "object",
-          properties: {
-            error: { type: "string" },
-          },
+          properties: { error: { type: "string" } },
         },
       },
     },
@@ -53,10 +48,10 @@ async function charactersRoutes(app, options) {
     schema: {
       description: "Get all weapons",
       tags: ["Weapons"],
-      summary: "Returns a list of all weapons",
+      summary: "Returns a list of weapons",
       response: {
         200: {
-          description: "List of weapons",
+          description: "Successful response",
           type: "array",
           items: {
             type: "object",
@@ -73,11 +68,9 @@ async function charactersRoutes(app, options) {
           },
         },
         500: {
-          description: "Server Error",
+          description: "Internal Server Error",
           type: "object",
-          properties: {
-            error: { type: "string" },
-          },
+          properties: { error: { type: "string" } },
         },
       },
     },
@@ -88,15 +81,23 @@ async function charactersRoutes(app, options) {
     schema: {
       description: "Update user characters",
       tags: ["Characters"],
-      summary: "User selects characters",
+      summary: "User updates character list",
       body: {
         type: "object",
-        required: ["userId", "characterIds"],
+        required: ["userId", "characters"],
         properties: {
           userId: { type: "string" },
-          characterIds: {
+          characters: {
             type: "array",
-            items: { type: "string" },
+            items: {
+              type: "object",
+              properties: {
+                characterId: { type: "string" },
+                rank: { type: "integer" },
+                mindscape: { type: "integer" },
+              },
+              required: ["characterId", "rank", "mindscape"],
+            },
           },
         },
       },
@@ -104,143 +105,21 @@ async function charactersRoutes(app, options) {
         200: {
           description: "Characters updated successfully",
           type: "object",
-          properties: {
-            message: { type: "string" },
-          },
+          properties: { message: { type: "string" } },
         },
         400: {
           description: "Bad Request",
           type: "object",
-          properties: {
-            error: { type: "string" },
-          },
+          properties: { error: { type: "string" } },
         },
         500: {
           description: "Internal Server Error",
           type: "object",
-          properties: {
-            error: { type: "string" },
-          },
+          properties: { error: { type: "string" } },
         },
       },
     },
     handler: updateUserCharacters,
-  });
-
-  app.post("/user/characters/add", {
-    schema: {
-      description: "Add a character to a user",
-      tags: ["Characters"],
-      summary: "Adds a character to a user with inherited rank",
-      body: {
-        type: "object",
-        required: ["userId", "characterId"],
-        properties: {
-          userId: { type: "string" },
-          characterId: { type: "string" },
-        },
-      },
-      response: {
-        201: {
-          description: "Character added successfully",
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            userId: { type: "string" },
-            characterId: { type: "string" },
-            rank: { type: "integer" },
-            mindscape: { type: "integer" },
-            createdAt: { type: "string", format: "date-time" },
-          },
-        },
-        400: {
-          description: "Bad Request",
-          type: "object",
-          properties: {
-            error: { type: "string" },
-          },
-        },
-        404: {
-          description: "Character not found",
-          type: "object",
-          properties: {
-            error: { type: "string" },
-          },
-        },
-        500: {
-          description: "Internal Server Error",
-          type: "object",
-          properties: {
-            error: { type: "string" },
-          },
-        },
-      },
-    },
-    handler: addCharacterToUser,
-  });
-
-  app.post("/user/characters/get", {
-    // POST + body
-    schema: {
-      description: "Get all characters of a user",
-      tags: ["Characters"],
-      summary: "Returns a list of user's characters",
-      body: {
-        type: "object",
-        required: ["userId"],
-        properties: {
-          userId: { type: "string" },
-        },
-      },
-      response: {
-        200: {
-          description: "List of user's characters",
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              id: { type: "string" },
-              userId: { type: "string" },
-              characterId: { type: "string" },
-              rank: { type: "integer" },
-              mindscape: { type: "integer" },
-              createdAt: { type: "string", format: "date-time" },
-              character: {
-                type: "object",
-                properties: {
-                  id: { type: "string" },
-                  code: { type: "string" },
-                  rank: { type: "integer" },
-                  mindscape: { type: "integer" },
-                  type: { type: "integer" },
-                  element: { type: "integer" },
-                  camp: { type: "integer" },
-                  en: { type: "string" },
-                  ru: { type: "string" },
-                  portrait: { type: "string" },
-                  icon: { type: "string" },
-                  halfPortrait: { type: "string" },
-                  halfPortrait170: { type: "string" },
-                  iconHoyo: { type: "string" },
-                  createdAt: { type: "string", format: "date-time" },
-                },
-              },
-            },
-          },
-        },
-        400: {
-          description: "Bad Request",
-          type: "object",
-          properties: { error: { type: "string" } },
-        },
-        500: {
-          description: "Internal Server Error",
-          type: "object",
-          properties: { error: { type: "string" } },
-        },
-      },
-    },
-    handler: getUserCharacters,
   });
 }
 

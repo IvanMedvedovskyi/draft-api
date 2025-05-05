@@ -1,113 +1,55 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
+// Получить всех персонажей
 export const getAllCharacters = async (request, reply) => {
   try {
     const characters = await prisma.character.findMany();
-
     return reply.status(200).send(characters);
   } catch (error) {
     console.error("Failed to fetch characters:", error);
-
     return reply.status(500).send({ error: "Internal Server Error" });
   }
 };
 
+// Получить всё оружие
 export const getAllWeapons = async (request, reply) => {
   try {
     const weapons = await prisma.weapon.findMany();
-    return reply.code(200).send(weapons);
+    return reply.status(200).send(weapons);
   } catch (error) {
     console.error("Failed to fetch weapons:", error);
-    return reply.code(500).send({ error: "Internal Server Error" });
+    return reply.status(500).send({ error: "Internal Server Error" });
   }
 };
 
-export const updateUserCharacters = async (request, reply) => {
-  const { userId, characterIds } = request.body;
+// Обновить список персонажей пользователя
+export const updateUserCharacters = async (req, reply) => {
+  const { userId, characters } = req.body;
 
-  if (!userId || !Array.isArray(characterIds) || characterIds.length === 0) {
+  if (!userId || !Array.isArray(characters)) {
     return reply
       .status(400)
-      .send({ error: "userId and characterIds are required" });
+      .send({ error: "Missing userId or characters array" });
   }
 
   try {
+    await prisma.userCharacter.deleteMany({ where: { userId } });
+
     await prisma.userCharacter.createMany({
-      data: characterIds.map((characterId) => ({
+      data: characters.map((c) => ({
         userId,
-        characterId,
+        characterId: c.characterId,
+        rank: c.rank,
+        mindscape: c.mindscape,
       })),
-      skipDuplicates: true,
     });
-
-    if (request.session.user) {
-      const characters = await prisma.userCharacter.findMany({
-        where: { userId },
-        include: { character: true },
-      });
-
-      request.session.user.characters = characters.map((uc) => uc.character);
-      await request.session.save();
-    }
 
     return reply
       .status(200)
       .send({ message: "Characters updated successfully" });
   } catch (error) {
-    console.error(error);
-    return reply.status(500).send({ error: "Failed to update characters" });
-  }
-};
-
-export const addCharacterToUser = async (req, reply) => {
-  const { userId, characterId, rank, mindscape } = req.body;
-
-  if (!userId || !characterId) {
-    return reply.status(400).send({ error: "Missing userId or characterId" });
-  }
-
-  try {
-    const character = await prisma.character.findUnique({
-      where: { id: characterId },
-    });
-
-    if (!character) {
-      return reply.status(404).send({ error: "Character not found" });
-    }
-
-    const userCharacter = await prisma.userCharacter.create({
-      data: {
-        userId,
-        characterId,
-        rank: rank ?? character.rank,
-        mindscape: mindscape ?? 0,
-      },
-    });
-
-    return reply.status(201).send(userCharacter);
-  } catch (error) {
-    console.error("Failed to add character to user:", error);
-    return reply.status(500).send({ error: "Internal Server Error" });
-  }
-};
-
-export const getUserCharacters = async (request, reply) => {
-  const { userId } = request.body;
-
-  if (!userId) {
-    return reply.status(400).send({ error: "Missing userId" });
-  }
-
-  try {
-    const userCharacters = await prisma.userCharacter.findMany({
-      where: { userId },
-      include: { character: true },
-    });
-
-    return reply.status(200).send(userCharacters);
-  } catch (error) {
-    console.error("Failed to fetch user characters:", error);
+    console.error("Failed to update user characters:", error);
     return reply.status(500).send({ error: "Internal Server Error" });
   }
 };
