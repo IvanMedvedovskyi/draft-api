@@ -70,3 +70,11 @@ model UserCharacter {
 
   @@unique([userId, characterId])
 }
+
+model AdminPanelUser {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  securityCode  String?
+  codeExpiresAt DateTime?
+}

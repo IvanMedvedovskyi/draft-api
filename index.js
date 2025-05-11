@@ -10,6 +10,7 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import authRoutes from "./src/routes/authRoutes.js";
 import profileRoutes from "./src/routes/profileRoutes.js";
 import charactersRoutes from "./src/routes/charactersRoutes.js";
+import adminPanelRoutes from "./src/routes/adminPanelRoutes.js";
 
 dotenv.config();
 
@@ -76,6 +77,7 @@ await app.register(fastifySwaggerUi, {
 app.register(authRoutes);
 app.register(profileRoutes);
 app.register(charactersRoutes);
+app.register(adminPanelRoutes);
 
 // --- Запуск сервера ---
 const start = async () => {
