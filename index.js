@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import multipart from "fastify-multipart";
 import dotenv from "dotenv";
 import fastifyCors from "@fastify/cors";
 import fastifyCookie from "@fastify/cookie";
@@ -18,6 +19,7 @@ const app = Fastify();
 
 app.setSerializerCompiler(() => JSON.stringify);
 
+app.register(multipart);
 // --- Настройка CORS ---
 app.register(fastifyCors, {
   origin: process.env.FRONTEND_URL,

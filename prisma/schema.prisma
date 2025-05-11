@@ -13,62 +13,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id         String          @id @default(cuid())
-  discordId  String          @unique
-  username   String
-  globalName String?
-  customName String?
-  avatar     String?
-  email      String?
-  createdAt  DateTime        @default(now())
-  characters UserCharacter[]
-}
-
 model Character {
-  id              String          @id
-  code            String
-  rank            Int
-  type            Int
-  element         Int
-  camp            Int
-  en              String
-  ru              String
-  portrait        String
-  icon            String
-  halfPortrait    String
-  halfPortrait170 String
-  iconHoyo        String
-  createdAt       DateTime        @default(now())
-  users           UserCharacter[]
-  mindscape       Int             @default(0)
-}
-
-model Weapon {
-  id          String  @id
-  icon        String
-  rank        Int
-  type        Int
-  en          String
-  ru          String?
-  iconUrl     String
-  hoyoIconSrc String?
-}
-
-model UserCharacter {
-  id          String @id @default(cuid())
-  userId      String
-  characterId String
-
-  user      User      @relation(fields: [userId], references: [id])
-  character Character @relation(fields: [characterId], references: [id])
-
-  rank      Int @default(0)
-  mindscape Int @default(0)
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, characterId])
+  id             String  @id @default(cuid())
+  name           String? 
+  imageUrl       String?
+  specialization String?
+  element        String?
 }
 
 model AdminPanelUser {
