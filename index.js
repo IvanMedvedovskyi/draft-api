@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import multipart from "fastify-multipart";
+import multipart from "@fastify/multipart";
 import dotenv from "dotenv";
 import fastifyCors from "@fastify/cors";
 import fastifyCookie from "@fastify/cookie";
@@ -15,13 +15,11 @@ import adminPanelRoutes from "./src/routes/adminPanelRoutes.js";
 
 dotenv.config();
 
-const app = Fastify();  
+const app = Fastify();
 
 app.setSerializerCompiler(() => JSON.stringify);
 
-app.register(multipart, {
-  attachFieldsToBody: true,
-});
+app.register(multipart);
 
 // --- Настройка CORS ---
 app.register(fastifyCors, {
