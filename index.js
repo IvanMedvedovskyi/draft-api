@@ -15,7 +15,7 @@ import adminPanelRoutes from "./src/routes/adminPanelRoutes.js";
 
 dotenv.config();
 
-const app = Fastify();
+const app = Fastify();  
 
 app.setSerializerCompiler(() => JSON.stringify);
 
