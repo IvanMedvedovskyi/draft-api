@@ -19,7 +19,13 @@ const app = Fastify();
 
 app.setSerializerCompiler(() => JSON.stringify);
 
-app.register(multipart);
+app.register(multipart, {
+  attachFieldsToBody: true,
+  limits: {
+    fileSize: 10 * 1024 * 1024, 
+  },
+});
+
 // --- Настройка CORS ---
 app.register(fastifyCors, {
   origin: process.env.FRONTEND_URL,
