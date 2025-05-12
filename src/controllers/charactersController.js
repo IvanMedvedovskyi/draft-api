@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { parseCSV } from "../utils/cvs";
+import { parseCSV } from "../utils/cvs.js";
 
 const prisma = new PrismaClient();
 
