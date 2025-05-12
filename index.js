@@ -19,7 +19,9 @@ const app = Fastify();
 
 app.setSerializerCompiler(() => JSON.stringify);
 
-app.register(multipart);
+app.register(multipart, {
+  attachFieldsToBody: true,
+});
 
 // --- Настройка CORS ---
 app.register(fastifyCors, {
