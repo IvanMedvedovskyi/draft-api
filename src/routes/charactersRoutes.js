@@ -6,6 +6,13 @@ async function charactersRoutes(app, options) {
       summary: "Upload CSV file with characters",
       description: "Заменяет всю таблицу персонажей новым CSV",
       consumes: ["multipart/form-data"],
+      body: {
+        type: "object",
+        properties: {
+          file: { type: "string", format: "binary" },
+        },
+        required: ["file"],
+      },
       response: {
         200: {
           type: "object",
