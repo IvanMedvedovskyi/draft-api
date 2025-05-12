@@ -4,8 +4,22 @@ import { parseCSV } from "../utils/cvs.js";
 const prisma = new PrismaClient();
 
 export async function uploadCharacters(req, res) {
-  const data = await req.file();
-  const records = await parseCSV(await data.toBuffer());
+  const parts = req.parts();
+
+  let fileBuffer = null;
+
+  for await (const part of parts) {
+    if (part.type === "file" && part.fieldname === "file") {
+      fileBuffer = await part.toBuffer();
+      break;
+    }
+  }
+
+  if (!fileBuffer) {
+    return res.status(400).send({ error: "Файл не загружен" });
+  }
+
+  const records = await parseCSV(fileBuffer);
 
   const requiredFields = [
     "name",
@@ -19,9 +33,7 @@ export async function uploadCharacters(req, res) {
 
   for (const field of requiredFields) {
     if (!records[0]?.[field]) {
-      return res
-        .status(400)
-        .send({ error: `Missing required field: ${field}` });
+      return res.status(400).send({ error: `Отсутствует поле: ${field}` });
     }
   }
 
