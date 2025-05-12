@@ -14,11 +14,14 @@ datasource db {
 }
 
 model Character {
-  id             String  @id @default(cuid())
-  name           String? 
-  imageUrl       String?
-  specialization String?
-  element        String?
+  id             String @id @default(cuid())
+  name           String
+  imageChar      String
+  element        String
+  imageElement   String
+  specialization String
+  imageSpec      String
+  rarity         Int
 }
 
 model AdminPanelUser {

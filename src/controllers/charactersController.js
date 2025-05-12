@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { parseCSV } from "../utils/cvs.js";
+import { parseCSV } from "../utils/cvs";
 
 const prisma = new PrismaClient();
 
@@ -7,7 +7,16 @@ export async function uploadCharacters(req, res) {
   const data = await req.file();
   const records = await parseCSV(await data.toBuffer());
 
-  const requiredFields = ["image", "name", "specialization", "element"];
+  const requiredFields = [
+    "name",
+    "imageChar",
+    "element",
+    "imageElement",
+    "specialization",
+    "imageSpec",
+    "rarity",
+  ];
+
   for (const field of requiredFields) {
     if (!records[0]?.[field]) {
       return res
@@ -21,9 +30,12 @@ export async function uploadCharacters(req, res) {
   await prisma.character.createMany({
     data: records.map((row) => ({
       name: row.name,
-      imageUrl: row.image,
-      specialization: row.specialization,
+      imageChar: row.imageChar,
       element: row.element,
+      imageElement: row.imageElement,
+      specialization: row.specialization,
+      imageSpec: row.imageSpec,
+      rarity: parseInt(row.rarity, 10),
     })),
   });
 
