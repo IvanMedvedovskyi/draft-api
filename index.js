@@ -19,10 +19,18 @@ const app = Fastify();
 
 app.setSerializerCompiler(() => JSON.stringify);
 
+app.addContentTypeParser(
+  /^multipart\/.*/,
+  { parseAs: "buffer" },
+  function (req, body, done) {
+    done(null, body);
+  }
+);
+
 app.register(multipart, {
   attachFieldsToBody: true,
   limits: {
-    fileSize: 10 * 1024 * 1024, 
+    fileSize: 10 * 1024 * 1024,
   },
 });
 
