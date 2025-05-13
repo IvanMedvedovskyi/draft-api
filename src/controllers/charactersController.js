@@ -4,9 +4,6 @@ import { parseCSV } from "../utils/cvs.js";
 const prisma = new PrismaClient();
 
 export async function uploadCharacters(req, res) {
-  console.log("🧾 Incoming headers:", req.headers);
-  console.log("📎 Content-Type:", req.headers["content-type"]);
-
   try {
     const parts = req.parts();
 
@@ -15,7 +12,6 @@ export async function uploadCharacters(req, res) {
     for await (const part of parts) {
       if (part.type === "file" && part.fieldname === "file") {
         fileBuffer = await part.toBuffer();
-        console.log("📁 Файл получен:", part.filename, "-", part.mimetype);
       }
     }
 
@@ -24,7 +20,6 @@ export async function uploadCharacters(req, res) {
     }
 
     const records = await parseCSV(fileBuffer);
-    console.log("🧮 Загружено строк из CSV:", records.length);
 
     await prisma.character.deleteMany();
     await prisma.character.createMany({
@@ -41,7 +36,19 @@ export async function uploadCharacters(req, res) {
 
     return res.send({ status: "ok", count: records.length });
   } catch (err) {
-    console.error("💥 Ошибка:", err);
+    return res.status(500).send({ error: "Ошибка сервера" });
+  }
+}
+export async function getAllCharacters(req, res) {
+  try {
+    const characters = await prisma.character.findMany();
+
+    if (!characters || characters.length === 0) {
+      return res.status(404).send({ error: "Персонажи не найдены" });
+    }
+
+    return res.status(200).send(characters);
+  } catch (error) {
     return res.status(500).send({ error: "Ошибка сервера" });
   }
 }

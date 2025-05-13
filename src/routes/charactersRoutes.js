@@ -1,4 +1,7 @@
-import { uploadCharacters } from "../controllers/charactersController.js";
+import {
+  uploadCharacters,
+  getAllCharacters,
+} from "../controllers/charactersController.js";
 
 async function charactersRoutes(app, options) {
   app.post("/upload/characters", {
@@ -17,6 +20,49 @@ async function charactersRoutes(app, options) {
       },
     },
     handler: uploadCharacters,
+  });
+
+  app.get("/characters", {
+    schema: {
+      summary: "Get all characters",
+      description: "Возвращает список всех персонажей",
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            data: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  imageChar: { type: "string" },
+                  element: { type: "string" },
+                  imageElement: { type: "string" },
+                  specialization: { type: "string" },
+                  imageSpec: { type: "string" },
+                  rarity: { type: "integer" },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+        500: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: getAllCharacters,
   });
 }
 
