@@ -6,6 +6,7 @@ import {
 async function charactersRoutes(app, options) {
   app.post("/upload/characters", {
     schema: {
+      tags: ["Characters"],
       summary: "Upload CSV file with characters",
       description: "Заменяет всю таблицу персонажей новым CSV",
       consumes: ["multipart/form-data"],
@@ -24,6 +25,7 @@ async function charactersRoutes(app, options) {
 
   app.get("/characters", {
     schema: {
+      tags: ["Characters"],
       summary: "Get all characters",
       description: "Возвращает список всех персонажей",
       response: {

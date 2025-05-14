@@ -6,6 +6,7 @@ import {
 async function weaponsRoutes(app, options) {
   app.post("/upload/weapons", {
     schema: {
+      tags: ["Weapons"],
       summary: "Upload CSV file with weapons",
       description: "Заменяет всю таблицу оружия новым CSV",
       consumes: ["multipart/form-data"],
@@ -24,6 +25,7 @@ async function weaponsRoutes(app, options) {
 
   app.get("/weapons", {
     schema: {
+      tags: ["Weapons"],
       summary: "Get all weapons",
       response: {
         200: {
