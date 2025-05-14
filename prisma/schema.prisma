@@ -13,6 +13,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Weapon {
+  id                  String @id @default(cuid())
+  imageWeapon         String
+  specialization      String
+  imageSpecialization String
+  rarity              String
+}
+
 model Character {
   id             String @id @default(cuid())
   name           String

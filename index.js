@@ -12,6 +12,7 @@ import authRoutes from "./src/routes/authRoutes.js";
 import profileRoutes from "./src/routes/profileRoutes.js";
 import charactersRoutes from "./src/routes/charactersRoutes.js";
 import adminPanelRoutes from "./src/routes/adminPanelRoutes.js";
+import weaponsRoutes from "./src/routes/weaponsRoutes.js";
 
 dotenv.config();
 
@@ -81,6 +82,7 @@ app.register(authRoutes);
 app.register(profileRoutes);
 app.register(charactersRoutes);
 app.register(adminPanelRoutes);
+app.register(weaponsRoutes);
 
 // --- Запуск сервера ---
 const start = async () => {

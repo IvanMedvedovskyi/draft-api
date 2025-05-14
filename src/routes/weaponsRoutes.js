@@ -3,11 +3,11 @@ import {
   uploadWeapons,
 } from "../controllers/weaponsController.js";
 
-async function charactersRoutes(app, options) {
+async function weaponsRoutes(app, options) {
   app.post("/upload/weapons", {
     schema: {
       summary: "Upload CSV file with weapons",
-      description: "Заменяет всю таблицу персонажей новым CSV",
+      description: "Заменяет всю таблицу оружия новым CSV",
       consumes: ["multipart/form-data"],
       response: {
         200: {
@@ -21,6 +21,28 @@ async function charactersRoutes(app, options) {
     },
     handler: uploadWeapons,
   });
+
+  app.get("/weapons", {
+    schema: {
+      summary: "Get all weapons",
+      response: {
+        200: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              imageWeapon: { type: "string" },
+              specialization: { type: "string" },
+              imageSpecialization: { type: "string" },
+              rarity: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    handler: getAllWeapons,
+  });
 }
 
-export default charactersRoutes;
+export default weaponsRoutes;
