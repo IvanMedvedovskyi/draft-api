@@ -24,6 +24,7 @@ export async function uploadWeapons(req, res) {
     await prisma.weapon.deleteMany();
     await prisma.weapon.createMany({
       data: records.map((row) => ({
+        name: row.name,
         imageWeapon: row.imageWeapon,
         specialization: row.specialization,
         imageSpecialization: row.imageSpecialization,
