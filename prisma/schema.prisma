@@ -19,7 +19,7 @@ model Weapon {
   imageWeapon         String
   specialization      String
   imageSpecialization String
-  rarity              String
+  rarity              Int
 }
 
 model Character {

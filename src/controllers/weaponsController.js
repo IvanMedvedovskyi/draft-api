@@ -34,6 +34,7 @@ export async function uploadWeapons(req, res) {
 
     return res.send({ status: "ok", count: records.length });
   } catch (err) {
+    console.error("uploadWeapons error:", err);
     return res.status(500).send({ error: "Ошибка сервера" });
   }
 }
