@@ -28,7 +28,7 @@ export async function uploadWeapons(req, res) {
         imageWeapon: row.imageWeapon,
         specialization: row.specialization,
         imageSpecialization: row.imageSpecialization,
-        rarity: row.rarity,
+        rarity: parseInt(row.rarity, 10),
       })),
     });
 
