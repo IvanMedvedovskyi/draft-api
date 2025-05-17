@@ -23,14 +23,15 @@ model Weapon {
 }
 
 model Character {
-  id             String @id @default(cuid())
-  name           String
+  id             String         @id @default(cuid())
+  name           String         @unique
   imageChar      String
   element        String
   imageElement   String
   specialization String
   imageSpec      String
   rarity         Int
+  characterCost  CharacterCost?
 }
 
 model AdminPanelUser {
@@ -39,4 +40,19 @@ model AdminPanelUser {
   passwordHash  String
   securityCode  String?
   codeExpiresAt DateTime?
+}
+
+model CharacterCost {
+  id      String  @id @default(cuid())
+  name    String  @unique
+  m0      Int
+  m1      Int
+  m2      Int
+  m3      Int
+  m4      Int
+  m5      Int
+  m6      Int
+  noLimit Boolean
+
+  character Character @relation(fields: [name], references: [name], onDelete: Cascade)
 }

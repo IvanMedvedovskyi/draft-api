@@ -1,6 +1,8 @@
 import {
   uploadCharacters,
   getAllCharacters,
+  getAllCharacterCosts,
+  uploadCharacterCosts,
 } from "../controllers/charactersController.js";
 
 async function charactersRoutes(app, options) {
@@ -65,6 +67,83 @@ async function charactersRoutes(app, options) {
       },
     },
     handler: getAllCharacters,
+  });
+
+  app.post("/upload/character-costs", {
+    schema: {
+      tags: ["CharacterCost"],
+      summary: "Upload CSV file with character costs",
+      description: "Заменяет всю таблицу костов персонажей новым CSV",
+      consumes: ["multipart/form-data"],
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            status: { type: "string" },
+            count: { type: "integer" },
+          },
+        },
+        400: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+        500: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: uploadCharacterCosts,
+  });
+
+  app.get("/character-costs", {
+    schema: {
+      tags: ["CharacterCost"],
+      summary: "Get all character costs",
+      description: "Возвращает список всех костов персонажей",
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            data: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  m0: { type: "integer" },
+                  m1: { type: "integer" },
+                  m2: { type: "integer" },
+                  m3: { type: "integer" },
+                  m4: { type: "integer" },
+                  m5: { type: "integer" },
+                  m6: { type: "integer" },
+                  noLimit: { type: "boolean" },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+        500: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: getAllCharacterCosts,
   });
 }
 
