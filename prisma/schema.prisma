@@ -43,16 +43,19 @@ model AdminPanelUser {
 }
 
 model CharacterCost {
-  id      String  @id @default(cuid())
-  name    String  @unique
-  m0      Int
-  m1      Int
-  m2      Int
-  m3      Int
-  m4      Int
-  m5      Int
-  m6      Int
-  noLimit Boolean
+  id           String   @id @default(cuid())
+  name         String   @unique
+  creatorName  String
+  ownerContact String 
+  canEditBy    String[]
+  m0           Int
+  m1           Int
+  m2           Int
+  m3           Int
+  m4           Int
+  m5           Int
+  m6           Int
+  noLimit      Boolean
 
   character Character @relation(fields: [name], references: [name], onDelete: Cascade)
 }

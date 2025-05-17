@@ -57,25 +57,34 @@ export async function getAllCharacters(req, res) {
 export async function uploadCharacterCosts(req, res) {
   try {
     const parts = req.parts();
+
     let fileBuffer = null;
+    const fields = {};
 
     for await (const part of parts) {
       if (part.type === "file" && part.fieldname === "file") {
         fileBuffer = await part.toBuffer();
+      } else if (part.type === "field") {
+        fields[part.fieldname] = part.value;
       }
     }
 
-    if (!fileBuffer) {
-      return res.status(400).send({ error: "Файл не загружен" });
+    const { name, creatorName, ownerContact, canEditBy } = fields;
+
+    if (!fileBuffer || !name || !creatorName || !ownerContact) {
+      return res.status(400).send({ error: "Отсутствуют обязательные поля" });
     }
 
     const records = await parseCSV(fileBuffer);
 
-    await prisma.characterCost.deleteMany();
+    await prisma.characterCost.deleteMany({ where: { name } });
 
     await prisma.characterCost.createMany({
       data: records.map((row) => ({
-        name: row.name,
+        name,
+        creatorName,
+        ownerContact,
+        canEditBy: canEditBy ? JSON.parse(canEditBy) : [],
         m0: parseInt(row.m0, 10),
         m1: parseInt(row.m1, 10),
         m2: parseInt(row.m2, 10),
@@ -89,6 +98,7 @@ export async function uploadCharacterCosts(req, res) {
 
     return res.send({ status: "ok", count: records.length });
   } catch (err) {
+    console.error(err);
     return res.status(500).send({ error: "Ошибка сервера" });
   }
 }
