@@ -69,19 +69,32 @@ export async function uploadCharacterCosts(req, res) {
       }
     }
 
-    const { name, creatorName, ownerContact, canEditBy } = fields;
+    const { creatorName, ownerContact, canEditBy } = fields;
 
-    if (!fileBuffer || !name || !creatorName || !ownerContact) {
+    if (!fileBuffer || !creatorName || !ownerContact) {
       return res.status(400).send({ error: "Отсутствуют обязательные поля" });
     }
 
     const records = await parseCSV(fileBuffer);
 
-    await prisma.characterCost.deleteMany({ where: { name } });
+    // 💣 Полностью очищаем таблицу
+    await prisma.characterCost.deleteMany();
 
-    await prisma.characterCost.createMany({
-      data: records.map((row) => ({
-        name,
+    // ✅ Вставляем все данные (name теперь берётся из CSV, characterId ищем по нему)
+    const dataToInsert = [];
+
+    for (const row of records) {
+      const character = await prisma.character.findUnique({
+        where: { name: row.name },
+      });
+
+      if (!character) {
+        console.warn(`Персонаж с именем "${row.name}" не найден, пропускаем`);
+        continue;
+      }
+
+      dataToInsert.push({
+        characterId: character.id,
         creatorName,
         ownerContact,
         canEditBy: canEditBy ? JSON.parse(canEditBy) : [],
@@ -93,10 +106,18 @@ export async function uploadCharacterCosts(req, res) {
         m5: parseInt(row.m5, 10),
         m6: parseInt(row.m6, 10),
         noLimit: row.nolimit === "true",
-      })),
-    });
+      });
+    }
 
-    return res.send({ status: "ok", count: records.length });
+    if (dataToInsert.length === 0) {
+      return res
+        .status(400)
+        .send({ error: "Нет валидных записей для загрузки" });
+    }
+
+    await prisma.characterCost.createMany({ data: dataToInsert });
+
+    return res.send({ status: "ok", count: dataToInsert.length });
   } catch (err) {
     console.error(err);
     return res.status(500).send({ error: "Ошибка сервера" });

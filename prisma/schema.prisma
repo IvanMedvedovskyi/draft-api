@@ -23,15 +23,15 @@ model Weapon {
 }
 
 model Character {
-  id             String         @id @default(cuid())
-  name           String         @unique
+  id             String          @id @default(cuid())
+  name           String          @unique
   imageChar      String
   element        String
   imageElement   String
   specialization String
   imageSpec      String
   rarity         Int
-  characterCost  CharacterCost?
+  characterCosts CharacterCost[]
 }
 
 model AdminPanelUser {
@@ -44,7 +44,7 @@ model AdminPanelUser {
 
 model CharacterCost {
   id           String   @id @default(cuid())
-  name         String   @unique
+  characterId  String 
   creatorName  String
   ownerContact String
   canEditBy    String[]
@@ -57,7 +57,7 @@ model CharacterCost {
   m6           Int
   noLimit      Boolean
 
-  character Character @relation(fields: [name], references: [name], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 }
 
 model WeaponCost {

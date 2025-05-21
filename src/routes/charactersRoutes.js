@@ -76,35 +76,6 @@ async function charactersRoutes(app, options) {
       description:
         "Заменяет всю таблицу костов персонажей новым CSV. Обязательные поля: file, name, creatorName, ownerContact. Поле canEditBy — необязательное (JSON-массив строк).",
       consumes: ["multipart/form-data"],
-      body: {
-        type: "object",
-        required: ["file", "name", "creatorName", "ownerContact"],
-        properties: {
-          file: {
-            type: "string",
-            format: "binary",
-            description: "CSV-файл с данными о костах",
-          },
-          name: {
-            type: "string",
-            description:
-              "Название шаблона костов (например, 'Default', 'Kazuha')",
-          },
-          creatorName: {
-            type: "string",
-            description: "Имя человека, загрузившего файл",
-          },
-          ownerContact: {
-            type: "string",
-            description: "Контактная информация (например, Telegram или email)",
-          },
-          canEditBy: {
-            type: "string",
-            description:
-              "JSON-массив строк (например, '[\"admin@email.com\"]') — список тех, кто может редактировать",
-          },
-        },
-      },
       response: {
         200: {
           type: "object",
