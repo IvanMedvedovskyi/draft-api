@@ -52,3 +52,62 @@ export async function getAllWeapons(req, res) {
     return res.status(500).send({ error: "Ошибка сервера" });
   }
 }
+
+export async function uploadWeaponCosts(req, res) {
+  try {
+    const parts = req.parts();
+
+    let fileBuffer = null;
+
+    for await (const part of parts) {
+      if (part.type === "file" && part.fieldname === "file") {
+        fileBuffer = await part.toBuffer();
+      }
+    }
+
+    if (!fileBuffer) {
+      return res.status(400).send({ error: "Файл не загружен" });
+    }
+
+    const records = await parseCSV(fileBuffer);
+
+    await prisma.weaponCost.deleteMany();
+    await prisma.weaponCost.createMany({
+      data: records.map((row) => ({
+        name: row.name,
+        secondName: row.secondName,
+        specialization: row.specialization,
+        r1: parseInt(row.r1, 10),
+        r2: parseInt(row.r2, 10),
+        r3: parseInt(row.r3, 10),
+        r4: parseInt(row.r4, 10),
+        r5: parseInt(row.r5, 10),
+        another_r1: parseInt(row.another_r1, 10),
+        another_r2: parseInt(row.another_r2, 10),
+        another_r3: parseInt(row.another_r3, 10),
+        another_r4: parseInt(row.another_r4, 10),
+        another_r5: parseInt(row.another_r5, 10),
+        offbuild: parseInt(row.offbuild, 10),
+      })),
+    });
+
+    return res.send({ status: "ok", count: records.length });
+  } catch (err) {
+    console.error("uploadWeaponCosts error:", err);
+    return res.status(500).send({ error: "Ошибка сервера" });
+  }
+}
+
+export async function getAllWeaponCosts(req, res) {
+  try {
+    const costs = await prisma.weaponCost.findMany();
+
+    if (!costs || costs.length === 0) {
+      return res.status(404).send({ error: "Данные не найдены" });
+    }
+
+    return res.status(200).send(costs);
+  } catch (error) {
+    return res.status(500).send({ error: "Ошибка сервера" });
+  }
+}

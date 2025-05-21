@@ -46,7 +46,7 @@ model CharacterCost {
   id           String   @id @default(cuid())
   name         String   @unique
   creatorName  String
-  ownerContact String 
+  ownerContact String
   canEditBy    String[]
   m0           Int
   m1           Int
@@ -58,4 +58,22 @@ model CharacterCost {
   noLimit      Boolean
 
   character Character @relation(fields: [name], references: [name], onDelete: Cascade)
+}
+
+model WeaponCost {
+  id             String @id @default(cuid())
+  name           String
+  secondName     String
+  specialization String
+  r1             Int
+  r2             Int
+  r3             Int
+  r4             Int
+  r5             Int
+  another_r1     Int
+  another_r2     Int
+  another_r3     Int
+  another_r4     Int
+  another_r5     Int
+  offbuild       Int
 }
