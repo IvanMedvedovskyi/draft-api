@@ -44,7 +44,7 @@ model AdminPanelUser {
 
 model CharacterCost {
   id           String   @id @default(cuid())
-  characterId  String 
+  characterId  String
   creatorName  String
   ownerContact String
   canEditBy    String[]
@@ -76,4 +76,10 @@ model WeaponCost {
   another_r4     Int
   another_r5     Int
   offbuild       Int
+
+  tableName    String
+  creatorName  String
+  ownerContact String
+  canEditBy    String[]
+  createdAt    DateTime @default(now())
 }

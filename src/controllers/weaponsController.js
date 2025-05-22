@@ -59,9 +59,30 @@ export async function uploadWeaponCosts(req, res) {
 
     let fileBuffer = null;
 
+    const metadata = {
+      tableName: null,
+      ownerContact: null,
+      creatorName: null,
+      canEditBy: [],
+    };
+
     for await (const part of parts) {
       if (part.type === "file" && part.fieldname === "file") {
         fileBuffer = await part.toBuffer();
+      } else if (part.type === "field") {
+        if (part.fieldname === "canEditBy") {
+          try {
+            metadata.canEditBy = JSON.parse(part.value);
+          } catch (e) {
+            return res
+              .status(400)
+              .send({ error: "Невалидный JSON в canEditBy" });
+          }
+        } else if (
+          ["tableName", "ownerContact", "creatorName"].includes(part.fieldname)
+        ) {
+          metadata[part.fieldname] = part.value;
+        }
       }
     }
 
@@ -69,11 +90,27 @@ export async function uploadWeaponCosts(req, res) {
       return res.status(400).send({ error: "Файл не загружен" });
     }
 
-    const records = await parseCSV(fileBuffer);
+    // 👇 Замените это на свою функцию чтения CSV из буфера
+    const costs = await parseCSV(fileBuffer);
+
+    if (!Array.isArray(costs) || costs.length === 0) {
+      return res
+        .status(400)
+        .send({ error: "Файл пуст или не содержит данных" });
+    }
+
+    if (
+      !metadata.tableName ||
+      !metadata.ownerContact ||
+      !metadata.creatorName
+    ) {
+      return res.status(400).send({ error: "Отсутствуют мета-поля" });
+    }
 
     await prisma.weaponCost.deleteMany();
+
     await prisma.weaponCost.createMany({
-      data: records.map((row) => ({
+      data: costs.map((row) => ({
         name: row.name,
         secondName: row.secondName,
         specialization: row.specialization,
@@ -88,10 +125,21 @@ export async function uploadWeaponCosts(req, res) {
         another_r4: parseInt(row.another_r4, 10),
         another_r5: parseInt(row.another_r5, 10),
         offbuild: parseInt(row.offbuild, 10),
+        tableName: metadata.tableName,
+        creatorName: metadata.creatorName,
+        ownerContact: metadata.ownerContact,
+        canEditBy: metadata.canEditBy,
       })),
     });
 
-    return res.send({ status: "ok", count: records.length });
+    return res.send({
+      status: "ok",
+      tableName: metadata.tableName,
+      ownerContact: metadata.ownerContact,
+      creatorName: metadata.creatorName,
+      canEditBy: metadata.canEditBy,
+      count: costs.length,
+    });
   } catch (err) {
     console.error("uploadWeaponCosts error:", err);
     return res.status(500).send({ error: "Ошибка сервера" });
@@ -100,14 +148,66 @@ export async function uploadWeaponCosts(req, res) {
 
 export async function getAllWeaponCosts(req, res) {
   try {
-    const costs = await prisma.weaponCost.findMany();
+    const all = await prisma.weaponCost.findMany();
 
-    if (!costs || costs.length === 0) {
-      return res.status(404).send({ error: "Данные не найдены" });
+    if (all.length === 0) {
+      return res.send({
+        tableName: null,
+        creatorName: null,
+        ownerContact: null,
+        canEditBy: [],
+        costs: [],
+      });
     }
 
-    return res.status(200).send(costs);
-  } catch (error) {
+    // Берём метаданные из первой записи
+    const { tableName, creatorName, ownerContact, canEditBy } = all[0];
+
+    const costs = all.map(
+      ({
+        id,
+        name,
+        secondName,
+        specialization,
+        r1,
+        r2,
+        r3,
+        r4,
+        r5,
+        another_r1,
+        another_r2,
+        another_r3,
+        another_r4,
+        another_r5,
+        offbuild,
+      }) => ({
+        id,
+        name,
+        secondName,
+        specialization,
+        r1,
+        r2,
+        r3,
+        r4,
+        r5,
+        another_r1,
+        another_r2,
+        another_r3,
+        another_r4,
+        another_r5,
+        offbuild,
+      })
+    );
+
+    return res.send({
+      tableName,
+      creatorName,
+      ownerContact,
+      canEditBy,
+      costs,
+    });
+  } catch (err) {
+    console.error("getWeaponCosts error:", err);
     return res.status(500).send({ error: "Ошибка сервера" });
   }
 }
