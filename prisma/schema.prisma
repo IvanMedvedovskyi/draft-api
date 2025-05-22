@@ -43,7 +43,8 @@ model AdminPanelUser {
 }
 
 model CharacterCost {
-  id           String   @id @default(cuid())
+  id        String @id @default(cuid())
+  tableName String @default("Default Character Table")
   characterId  String
   creatorName  String
   ownerContact String

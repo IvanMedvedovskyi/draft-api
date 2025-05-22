@@ -69,18 +69,16 @@ export async function uploadCharacterCosts(req, res) {
       }
     }
 
-    const { creatorName, ownerContact, canEditBy } = fields;
+    const { creatorName, ownerContact, canEditBy, tableName } = fields;
 
-    if (!fileBuffer || !creatorName || !ownerContact) {
+    if (!fileBuffer || !creatorName || !ownerContact || !tableName) {
       return res.status(400).send({ error: "Отсутствуют обязательные поля" });
     }
 
     const records = await parseCSV(fileBuffer);
 
-    // 💣 Полностью очищаем таблицу
     await prisma.characterCost.deleteMany();
 
-    // ✅ Вставляем все данные (name теперь берётся из CSV, characterId ищем по нему)
     const dataToInsert = [];
 
     for (const row of records) {
@@ -89,7 +87,7 @@ export async function uploadCharacterCosts(req, res) {
       });
 
       if (!character) {
-        console.warn(`Персонаж с именем "${row.name}" не найден, пропускаем`);
+        console.warn(`Персонаж "${row.name}" не найден`);
         continue;
       }
 
@@ -98,6 +96,7 @@ export async function uploadCharacterCosts(req, res) {
         creatorName,
         ownerContact,
         canEditBy: canEditBy ? JSON.parse(canEditBy) : [],
+        tableName,
         m0: parseInt(row.m0, 10),
         m1: parseInt(row.m1, 10),
         m2: parseInt(row.m2, 10),
@@ -110,9 +109,7 @@ export async function uploadCharacterCosts(req, res) {
     }
 
     if (dataToInsert.length === 0) {
-      return res
-        .status(400)
-        .send({ error: "Нет валидных записей для загрузки" });
+      return res.status(400).send({ error: "Нет валидных записей" });
     }
 
     await prisma.characterCost.createMany({ data: dataToInsert });
@@ -126,14 +123,44 @@ export async function uploadCharacterCosts(req, res) {
 
 export async function getAllCharacterCosts(req, res) {
   try {
-    const costs = await prisma.characterCost.findMany();
+    const all = await prisma.characterCost.findMany();
 
-    if (!costs || costs.length === 0) {
-      return res.status(404).send({ message: "Косты не найдены" });
+    if (all.length === 0) {
+      return res.send({
+        tableName: null,
+        creatorName: null,
+        ownerContact: null,
+        canEditBy: [],
+        costs: [],
+      });
     }
 
-    return res.status(200).send({ data: costs });
+    const { creatorName, ownerContact, canEditBy, tableName } = all[0];
+
+    const costs = all.map(
+      ({ id, characterId, m0, m1, m2, m3, m4, m5, m6, noLimit }) => ({
+        id,
+        characterId,
+        m0,
+        m1,
+        m2,
+        m3,
+        m4,
+        m5,
+        m6,
+        noLimit,
+      })
+    );
+
+    return res.send({
+      tableName,
+      creatorName,
+      ownerContact,
+      canEditBy,
+      costs,
+    });
   } catch (err) {
+    console.error("getCharacterCosts error:", err);
     return res.status(500).send({ error: "Ошибка сервера" });
   }
 }
