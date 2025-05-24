@@ -77,26 +77,24 @@ export async function uploadCharacterCosts(req, res) {
 
     const records = await parseCSV(fileBuffer);
 
-    await prisma.characterCost.deleteMany();
+    // ❌ Удаляем все предыдущие таблицы и косты
+    await prisma.characterCostTable.deleteMany();
+
+    // ✅ Создаём новую таблицу
+    const table = await prisma.characterCostTable.create({
+      data: {
+        tableName,
+        creatorName,
+        ownerContact,
+        canEditBy: canEditBy ? JSON.parse(canEditBy) : [],
+      },
+    });
 
     const dataToInsert = [];
 
     for (const row of records) {
-      const character = await prisma.character.findUnique({
-        where: { name: row.name },
-      });
-
-      if (!character) {
-        console.warn(`Персонаж "${row.name}" не найден`);
-        continue;
-      }
-
       dataToInsert.push({
-        characterId: character.id,
-        creatorName,
-        ownerContact,
-        canEditBy: canEditBy ? JSON.parse(canEditBy) : [],
-        tableName,
+        tableId: table.id,
         m0: parseInt(row.m0, 10),
         m1: parseInt(row.m1, 10),
         m2: parseInt(row.m2, 10),
@@ -114,7 +112,11 @@ export async function uploadCharacterCosts(req, res) {
 
     await prisma.characterCost.createMany({ data: dataToInsert });
 
-    return res.send({ status: "ok", count: dataToInsert.length });
+    return res.send({
+      status: "ok",
+      count: dataToInsert.length,
+      tableId: table.id,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).send({ error: "Ошибка сервера" });
@@ -123,44 +125,69 @@ export async function uploadCharacterCosts(req, res) {
 
 export async function getAllCharacterCosts(req, res) {
   try {
-    const all = await prisma.characterCost.findMany();
+    const tables = await prisma.characterCostTable.findMany({
+      include: {
+        costs: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-    if (all.length === 0) {
-      return res.send({
-        tableName: null,
-        creatorName: null,
-        ownerContact: null,
-        canEditBy: [],
-        costs: [],
-      });
+    if (tables.length === 0) {
+      return res.send([]);
     }
 
-    const { creatorName, ownerContact, canEditBy, tableName } = all[0];
+    const response = tables.map((table) => ({
+      id: table.id,
+      tableName: table.tableName,
+      creatorName: table.creatorName,
+      ownerContact: table.ownerContact,
+      canEditBy: table.canEditBy,
+      costs: table.costs.map((cost) => ({
+        id: cost.id,
+        characterId: cost.characterId,
+        m0: cost.m0,
+        m1: cost.m1,
+        m2: cost.m2,
+        m3: cost.m3,
+        m4: cost.m4,
+        m5: cost.m5,
+        m6: cost.m6,
+        noLimit: cost.noLimit,
+      })),
+    }));
 
-    const costs = all.map(
-      ({ id, characterId, m0, m1, m2, m3, m4, m5, m6, noLimit }) => ({
-        id,
-        characterId,
-        m0,
-        m1,
-        m2,
-        m3,
-        m4,
-        m5,
-        m6,
-        noLimit,
-      })
-    );
-
-    return res.send({
-      tableName,
-      creatorName,
-      ownerContact,
-      canEditBy,
-      costs,
-    });
+    return res.send(response);
   } catch (err) {
     console.error("getCharacterCosts error:", err);
     return res.status(500).send({ error: "Ошибка сервера" });
+  }
+}
+
+export async function deleteCharacterCostTableById(req, res) {
+  try {
+    const { tableId } = req.body;
+
+    if (!tableId) {
+      return res.status(400).send({ message: "tableId не указан" });
+    }
+
+    const table = await prisma.characterCostTable.findUnique({
+      where: { id: tableId },
+    });
+
+    if (!table) {
+      return res.status(404).send({ message: "Таблица не найдена" });
+    }
+
+    await prisma.characterCostTable.delete({
+      where: { id: tableId },
+    });
+
+    return res.status(200).send({ message: "Таблица и косты удалены" });
+  } catch (error) {
+    console.error("Ошибка при удалении:", error);
+    return res.status(500).send({ message: "Ошибка сервера" });
   }
 }

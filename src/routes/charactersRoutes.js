@@ -3,6 +3,7 @@ import {
   getAllCharacters,
   getAllCharacterCosts,
   uploadCharacterCosts,
+  deleteCharacterCostTableById,
 } from "../controllers/charactersController.js";
 
 async function charactersRoutes(app, options) {
@@ -146,6 +147,49 @@ async function charactersRoutes(app, options) {
       },
     },
     handler: getAllCharacterCosts,
+  });
+
+  app.delete("/delete/character-costs", {
+    schema: {
+      tags: ["CharacterCost"],
+      summary: "Delete character cost by ID (from body)",
+      description:
+        "Удаляет конкретную запись о костах персонажа по телу запроса",
+      body: {
+        type: "object",
+        properties: {
+          tableId: { type: "string" },
+        },
+        required: ["tableId"],
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            message: { type: "string" },
+          },
+        },
+        400: {
+          type: "object",
+          properties: {
+            message: { type: "string" },
+          },
+        },
+        404: {
+          type: "object",
+          properties: {
+            message: { type: "string" },
+          },
+        },
+        500: {
+          type: "object",
+          properties: {
+            message: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: deleteCharacterCostTableById,
   });
 }
 

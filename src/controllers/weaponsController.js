@@ -58,7 +58,6 @@ export async function uploadWeaponCosts(req, res) {
     const parts = req.parts();
 
     let fileBuffer = null;
-
     const metadata = {
       tableName: null,
       ownerContact: null,
@@ -73,7 +72,7 @@ export async function uploadWeaponCosts(req, res) {
         if (part.fieldname === "canEditBy") {
           try {
             metadata.canEditBy = JSON.parse(part.value);
-          } catch (e) {
+          } catch {
             return res
               .status(400)
               .send({ error: "Невалидный JSON в canEditBy" });
@@ -86,59 +85,60 @@ export async function uploadWeaponCosts(req, res) {
       }
     }
 
-    if (!fileBuffer) {
-      return res.status(400).send({ error: "Файл не загружен" });
+    if (
+      !fileBuffer ||
+      !metadata.tableName ||
+      !metadata.creatorName ||
+      !metadata.ownerContact
+    ) {
+      return res
+        .status(400)
+        .send({ error: "Отсутствуют обязательные поля или файл" });
     }
 
-    // 👇 Замените это на свою функцию чтения CSV из буфера
-    const costs = await parseCSV(fileBuffer);
-
-    if (!Array.isArray(costs) || costs.length === 0) {
+    const parsed = await parseCSV(fileBuffer);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
       return res
         .status(400)
         .send({ error: "Файл пуст или не содержит данных" });
     }
 
-    if (
-      !metadata.tableName ||
-      !metadata.ownerContact ||
-      !metadata.creatorName
-    ) {
-      return res.status(400).send({ error: "Отсутствуют мета-поля" });
-    }
+    // удаляем старые таблицы
+    await prisma.weaponCostTable.deleteMany();
 
-    await prisma.weaponCost.deleteMany();
-
-    await prisma.weaponCost.createMany({
-      data: costs.map((row) => ({
-        name: row.name,
-        secondName: row.secondName,
-        specialization: row.specialization,
-        r1: parseInt(row.r1, 10),
-        r2: parseInt(row.r2, 10),
-        r3: parseInt(row.r3, 10),
-        r4: parseInt(row.r4, 10),
-        r5: parseInt(row.r5, 10),
-        another_r1: parseInt(row.another_r1, 10),
-        another_r2: parseInt(row.another_r2, 10),
-        another_r3: parseInt(row.another_r3, 10),
-        another_r4: parseInt(row.another_r4, 10),
-        another_r5: parseInt(row.another_r5, 10),
-        offbuild: parseInt(row.offbuild, 10),
+    const table = await prisma.weaponCostTable.create({
+      data: {
         tableName: metadata.tableName,
         creatorName: metadata.creatorName,
         ownerContact: metadata.ownerContact,
         canEditBy: metadata.canEditBy,
-      })),
+      },
     });
+
+    const dataToInsert = parsed.map((row) => ({
+      tableId: table.id,
+      name: row.name,
+      secondName: row.secondName,
+      specialization: row.specialization,
+      r1: parseInt(row.r1, 10),
+      r2: parseInt(row.r2, 10),
+      r3: parseInt(row.r3, 10),
+      r4: parseInt(row.r4, 10),
+      r5: parseInt(row.r5, 10),
+      another_r1: parseInt(row.another_r1, 10),
+      another_r2: parseInt(row.another_r2, 10),
+      another_r3: parseInt(row.another_r3, 10),
+      another_r4: parseInt(row.another_r4, 10),
+      another_r5: parseInt(row.another_r5, 10),
+      offbuild: parseInt(row.offbuild, 10),
+    }));
+
+    await prisma.weaponCost.createMany({ data: dataToInsert });
 
     return res.send({
       status: "ok",
-      tableName: metadata.tableName,
-      ownerContact: metadata.ownerContact,
-      creatorName: metadata.creatorName,
-      canEditBy: metadata.canEditBy,
-      count: costs.length,
+      tableId: table.id,
+      count: dataToInsert.length,
     });
   } catch (err) {
     console.error("uploadWeaponCosts error:", err);
@@ -148,66 +148,52 @@ export async function uploadWeaponCosts(req, res) {
 
 export async function getAllWeaponCosts(req, res) {
   try {
-    const all = await prisma.weaponCost.findMany();
-
-    if (all.length === 0) {
-      return res.send({
-        tableName: null,
-        creatorName: null,
-        ownerContact: null,
-        canEditBy: [],
-        costs: [],
-      });
-    }
-
-    // Берём метаданные из первой записи
-    const { tableName, creatorName, ownerContact, canEditBy } = all[0];
-
-    const costs = all.map(
-      ({
-        id,
-        name,
-        secondName,
-        specialization,
-        r1,
-        r2,
-        r3,
-        r4,
-        r5,
-        another_r1,
-        another_r2,
-        another_r3,
-        another_r4,
-        another_r5,
-        offbuild,
-      }) => ({
-        id,
-        name,
-        secondName,
-        specialization,
-        r1,
-        r2,
-        r3,
-        r4,
-        r5,
-        another_r1,
-        another_r2,
-        another_r3,
-        another_r4,
-        another_r5,
-        offbuild,
-      })
-    );
-
-    return res.send({
-      tableName,
-      creatorName,
-      ownerContact,
-      canEditBy,
-      costs,
+    const tables = await prisma.weaponCostTable.findMany({
+      include: { costs: true },
+      orderBy: { createdAt: "desc" },
     });
+
+    return res.send(
+      tables.map((table) => ({
+        id: table.id,
+        tableName: table.tableName,
+        creatorName: table.creatorName,
+        ownerContact: table.ownerContact,
+        canEditBy: table.canEditBy,
+        costs: table.costs.map((cost) => ({
+          id: cost.id,
+          name: cost.name,
+          secondName: cost.secondName,
+          specialization: cost.specialization,
+          r1: cost.r1,
+          r2: cost.r2,
+          r3: cost.r3,
+          r4: cost.r4,
+          r5: cost.r5,
+          another_r1: cost.another_r1,
+          another_r2: cost.another_r2,
+          another_r3: cost.another_r3,
+          another_r4: cost.another_r4,
+          another_r5: cost.another_r5,
+          offbuild: cost.offbuild,
+        })),
+      }))
+    );
   } catch (err) {
     console.error("getWeaponCosts error:", err);
     return res.status(500).send({ error: "Ошибка сервера" });
   }
+}
+
+export async function deleteWeaponCostTableById(req, res) {
+  const { tableId } = req.body;
+  if (!tableId) return res.status(400).send({ message: "tableId не указан" });
+
+  const table = await prisma.weaponCostTable.findUnique({
+    where: { id: tableId },
+  });
+  if (!table) return res.status(404).send({ message: "Таблица не найдена" });
+
+  await prisma.weaponCostTable.delete({ where: { id: tableId } });
+  return res.send({ message: "Таблица и связанные косты удалены" });
 }

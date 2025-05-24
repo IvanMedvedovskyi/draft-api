@@ -23,15 +23,14 @@ model Weapon {
 }
 
 model Character {
-  id             String          @id @default(cuid())
-  name           String          @unique
+  id             String @id @default(cuid())
+  name           String @unique
   imageChar      String
   element        String
   imageElement   String
   specialization String
   imageSpec      String
   rarity         Int
-  characterCosts CharacterCost[]
 }
 
 model AdminPanelUser {
@@ -42,27 +41,46 @@ model AdminPanelUser {
   codeExpiresAt DateTime?
 }
 
-model CharacterCost {
-  id        String @id @default(cuid())
-  tableName String @default("Default Character Table")
-  characterId  String
+model CharacterCostTable {
+  id           String          @id @default(cuid())
+  tableName    String
   creatorName  String
   ownerContact String
   canEditBy    String[]
-  m0           Int
-  m1           Int
-  m2           Int
-  m3           Int
-  m4           Int
-  m5           Int
-  m6           Int
-  noLimit      Boolean
+  costs        CharacterCost[]
+  createdAt    DateTime        @default(now())
+}
 
-  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+model CharacterCost {
+  id      String             @id @default(cuid())
+  tableId String
+  table   CharacterCostTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  m0      Int
+  m1      Int
+  m2      Int
+  m3      Int
+  m4      Int
+  m5      Int
+  m6      Int
+  noLimit Boolean
+}
+
+model WeaponCostTable {
+  id           String       @id @default(cuid())
+  tableName    String
+  creatorName  String
+  ownerContact String
+  canEditBy    String[]
+  costs        WeaponCost[]
+  createdAt    DateTime     @default(now())
 }
 
 model WeaponCost {
-  id             String @id @default(cuid())
+  id      String          @id @default(cuid())
+  tableId String
+  table   WeaponCostTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
   name           String
   secondName     String
   specialization String
@@ -77,10 +95,4 @@ model WeaponCost {
   another_r4     Int
   another_r5     Int
   offbuild       Int
-
-  tableName    String
-  creatorName  String
-  ownerContact String
-  canEditBy    String[]
-  createdAt    DateTime @default(now())
 }
