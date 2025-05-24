@@ -63,6 +63,7 @@ export async function uploadWeaponCosts(req, res) {
       ownerContact: null,
       creatorName: null,
       canEditBy: [],
+      csvName: null,
     };
 
     for await (const part of parts) {
@@ -89,7 +90,8 @@ export async function uploadWeaponCosts(req, res) {
       !fileBuffer ||
       !metadata.tableName ||
       !metadata.creatorName ||
-      !metadata.ownerContact
+      !metadata.ownerContact ||
+      !metadata.csvName
     ) {
       return res
         .status(400)
@@ -111,6 +113,7 @@ export async function uploadWeaponCosts(req, res) {
         tableName: metadata.tableName,
         creatorName: metadata.creatorName,
         ownerContact: metadata.ownerContact,
+        csvName: metadata.csvName,
         canEditBy: metadata.canEditBy,
       },
     });
@@ -159,6 +162,7 @@ export async function getAllWeaponCosts(req, res) {
         tableName: table.tableName,
         creatorName: table.creatorName,
         ownerContact: table.ownerContact,
+        csvName: table.csvName,
         canEditBy: table.canEditBy,
         costs: table.costs.map((cost) => ({
           id: cost.id,

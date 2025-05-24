@@ -69,9 +69,15 @@ export async function uploadCharacterCosts(req, res) {
       }
     }
 
-    const { creatorName, ownerContact, canEditBy, tableName } = fields;
+    const { creatorName, ownerContact, canEditBy, tableName, csvName } = fields;
 
-    if (!fileBuffer || !creatorName || !ownerContact || !tableName) {
+    if (
+      !fileBuffer ||
+      !creatorName ||
+      !ownerContact ||
+      !tableName ||
+      !csvName
+    ) {
       return res.status(400).send({ error: "Отсутствуют обязательные поля" });
     }
 
@@ -86,6 +92,7 @@ export async function uploadCharacterCosts(req, res) {
         tableName,
         creatorName,
         ownerContact,
+        csvName,
         canEditBy: canEditBy ? JSON.parse(canEditBy) : [],
       },
     });
@@ -143,6 +150,7 @@ export async function getAllCharacterCosts(req, res) {
       tableName: table.tableName,
       creatorName: table.creatorName,
       ownerContact: table.ownerContact,
+      csvName: table.csvName,
       canEditBy: table.canEditBy,
       costs: table.costs.map((cost) => ({
         id: cost.id,

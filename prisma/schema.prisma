@@ -47,6 +47,7 @@ model CharacterCostTable {
   creatorName  String
   ownerContact String
   canEditBy    String[]
+  csvName      String          @default("")
   costs        CharacterCost[]
   createdAt    DateTime        @default(now())
 }
@@ -71,6 +72,7 @@ model WeaponCostTable {
   tableName    String
   creatorName  String
   ownerContact String
+  csvName      String       @default("")
   canEditBy    String[]
   costs        WeaponCost[]
   createdAt    DateTime     @default(now())
