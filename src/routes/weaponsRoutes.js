@@ -10,8 +10,18 @@ async function weaponsRoutes(app, options) {
   app.post("/upload/weapons", {
     schema: {
       tags: ["Weapons"],
-      summary: "Upload CSV file with weapons",
-      description: "Заменяет всю таблицу оружия новым CSV",
+      summary: "Загрузка CSV с оружием",
+      description: `
+Загружает CSV-файл с данными об оружии и полностью заменяет текущую таблицу оружия.
+
+📥 Поля multipart/form-data:
+- file: CSV-файл с колонками:
+  - name
+  - imageWeapon
+  - specialization
+  - imageSpecialization
+  - rarity (целое число)
+    `,
       consumes: ["multipart/form-data"],
       response: {
         200: {
@@ -29,7 +39,8 @@ async function weaponsRoutes(app, options) {
   app.get("/weapons", {
     schema: {
       tags: ["Weapons"],
-      summary: "Get all weapons",
+      summary: "Получить список оружий",
+      description: "Возвращает все оружия из базы данных.",
       response: {
         200: {
           type: "array",
@@ -37,6 +48,7 @@ async function weaponsRoutes(app, options) {
             type: "object",
             properties: {
               id: { type: "string" },
+              name: { type: "string" },
               imageWeapon: { type: "string" },
               specialization: { type: "string" },
               imageSpecialization: { type: "string" },
@@ -52,9 +64,22 @@ async function weaponsRoutes(app, options) {
   app.post("/upload/weapon-costs", {
     schema: {
       tags: ["Weapon Costs"],
-      summary: "Upload weapon costs CSV file",
-      description:
-        "Заменяет всю таблицу стоимости оружия. Все старые записи будут удалены.",
+      summary: "Загрузка CSV с костами оружия",
+      description: `
+Загружает таблицу стоимости оружия и заменяет старые записи.
+
+📥 Поля multipart/form-data:
+- file: CSV-файл с колонками:
+  - name, secondName, specialization,
+  - r1, r2, r3, r4, r5,
+  - another_r1, another_r2, another_r3, another_r4, another_r5,
+  - offbuild
+- tableName: строка — название таблицы
+- creatorName: строка — имя создателя
+- ownerContact: строка — контакт владельца
+- csvName: строка — название CSV-файла
+- canEditBy: JSON-массив строк (email), напр.: ["a@example.com", "b@example.com"]
+    `,
       consumes: ["multipart/form-data"],
       response: {
         200: {
@@ -85,9 +110,14 @@ async function weaponsRoutes(app, options) {
   app.get("/weapon-costs", {
     schema: {
       tags: ["Weapon Costs"],
-      summary: "Get all weapon cost tables",
-      description:
-        "Возвращает список таблиц с костами оружия, включая связанные записи",
+      summary: "Получить таблицы стоимости оружия",
+      description: `
+Возвращает список всех таблиц стоимости оружия и связанные с ними записи.
+
+Каждая таблица содержит:
+- id, tableName, creatorName, ownerContact, csvName, canEditBy
+- costs: массив записей по каждому оружию
+    `,
       response: {
         200: {
           type: "array",
@@ -98,6 +128,7 @@ async function weaponsRoutes(app, options) {
               tableName: { type: "string" },
               creatorName: { type: "string" },
               ownerContact: { type: "string" },
+              csvName: { type: "string" },
               canEditBy: {
                 type: "array",
                 items: { type: "string" },
@@ -136,7 +167,13 @@ async function weaponsRoutes(app, options) {
   app.delete("/delete/weapon-costs", {
     schema: {
       tags: ["Weapon Costs"],
-      summary: "Delete a weapon cost table by ID",
+      summary: "Удалить таблицу стоимости по ID",
+      description: `
+Удаляет таблицу и все связанные записи стоимости оружия.
+
+📥 Тело запроса (JSON):
+- tableId: строка — ID таблицы, которую нужно удалить
+    `,
       body: {
         type: "object",
         properties: {
