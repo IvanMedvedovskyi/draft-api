@@ -78,9 +78,7 @@ export async function uploadWeaponCosts(req, res) {
               .status(400)
               .send({ error: "Невалидный JSON в canEditBy" });
           }
-        } else if (
-          ["tableName", "ownerContact", "creatorName"].includes(part.fieldname)
-        ) {
+        } else if (part.fieldname in metadata) {
           metadata[part.fieldname] = part.value;
         }
       }
